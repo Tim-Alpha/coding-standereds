@@ -1,261 +1,354 @@
-Django
+# Django Project Structure with Template Rendering and Static Serving via Nginx)
 
 ```
-django-enterprise/
-├── manage.py                      # Django management commands entry point
-├── requirements/
-│   ├── base.txt                   # Common dependencies (Django, DRF, etc.)
-│   ├── development.txt            # Dev dependencies (debug-toolbar, pytest)
-│   ├── production.txt             # Production dependencies (gunicorn, sentry)
-│   └── testing.txt                # Testing dependencies (factory-boy, coverage)
-├── config/                        # Project configuration (renamed from project name)
-│   ├── __init__.py               # Makes config a package
-│   ├── settings/
-│   │   ├── __init__.py           # Makes settings a package
-│   │   ├── base.py               # Common settings for all environments
-│   │   ├── development.py        # Development-specific settings (DEBUG=True)
-│   │   ├── production.py         # Production settings (DEBUG=False, security)
-│   │   ├── testing.py            # Test settings (in-memory DB, fast tests)
-│   │   └── local.py.example      # Local overrides template (gitignored)
-│   ├── urls.py                   # Root URL configuration
-│   ├── wsgi.py                   # WSGI application for deployment
-│   ├── asgi.py                   # ASGI application for async/websockets
-│   └── celery.py                 # Celery configuration for background tasks
-├── apps/                         # All Django apps go here
-│   ├── __init__.py              # Makes apps a package
-│   ├── common/                  # Shared utilities across apps
-│   │   ├── __init__.py          # Makes common a package
-│   │   ├── models.py            # Abstract base models (TimeStampedModel)
-│   │   ├── mixins.py            # Reusable model/view mixins
-│   │   ├── permissions.py       # Custom DRF permissions
-│   │   ├── pagination.py        # Custom pagination classes
-│   │   ├── exceptions.py        # Custom exception classes
-│   │   ├── validators.py        # Custom field validators
-│   │   └── utils.py             # Helper functions
-│   ├── users/                   # User management app
-│   │   ├── __init__.py          # Makes users a package
-│   │   ├── models.py            # User model and related models
-│   │   ├── admin.py             # Django admin configuration
-│   │   ├── apps.py              # App configuration
-│   │   ├── views.py             # API views (DRF ViewSets)
-│   │   ├── serializers.py       # DRF serializers for validation
-│   │   ├── urls.py              # URL routing for this app
-│   │   ├── permissions.py       # App-specific permissions
-│   │   ├── filters.py           # Django-filter configurations
-│   │   ├── services.py          # Business logic layer
-│   │   ├── tasks.py             # Celery background tasks
-│   │   ├── signals.py           # Django signals handlers
-│   │   ├── managers.py          # Custom model managers
-│   │   ├── migrations/          # Database migration files
-│   │   └── tests/
-│   │       ├── __init__.py      # Makes tests a package
-│   │       ├── test_models.py   # Model tests
-│   │       ├── test_views.py    # View/API tests
-│   │       ├── test_services.py # Service layer tests
-│   │       └── factories.py     # Factory Boy test data factories
-│   ├── authentication/          # Auth and JWT handling
+django-social-app/
+├── manage.py                     # Django CLI tool
+├── requirements/                # Environment-specific dependencies
+│   ├── base.txt
+│   ├── development.txt
+│   ├── production.txt
+│   └── testing.txt
+├── config/                      # Main project configuration
+│   ├── __init__.py
+│   ├── settings/                # Environment settings split
 │   │   ├── __init__.py
-│   │   ├── models.py            # Custom auth models (refresh tokens)
-│   │   ├── views.py             # Login, logout, refresh endpoints
-│   │   ├── serializers.py       # Auth request/response serializers
-│   │   ├── urls.py              # Auth URLs
-│   │   ├── services.py          # Auth business logic
-│   │   ├── permissions.py       # Auth-related permissions
-│   │   ├── middleware.py        # Custom auth middleware
-│   │   ├── backends.py          # Custom authentication backends
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   ├── production.py
+│   │   ├── testing.py
+│   │   └── local.py.example
+│   ├── urls.py                  # Root URL dispatcher
+│   ├── wsgi.py                  # WSGI app for prod
+│   ├── asgi.py                  # ASGI app for async
+│   └── celery.py                # Celery app definition
+├── apps/                        # All Django apps
+│   ├── __init__.py
+│   ├── common/                 # Shared logic and utilities
+│   │   ├── models.py
+│   │   ├── mixins.py
+│   │   ├── utils.py
+│   │   ├── pagination.py
+│   │   ├── permissions.py
+│   │   ├── exceptions.py
+│   │   ├── validators.py
 │   │   └── tests/
-│   ├── core/                    # Core business logic app
-│   │   ├── __init__.py
-│   │   ├── models.py            # Core business models
-│   │   ├── views.py             # Core API endpoints
-│   │   ├── serializers.py       # Core serializers
-│   │   ├── urls.py              # Core URLs
-│   │   ├── services.py          # Core business services
+│   ├── users/                  # User app (auth, profiles, follow)
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── serializers.py
+│   │   ├── services.py
+│   │   ├── tasks.py
+│   │   ├── admin.py
+│   │   ├── managers.py
 │   │   └── tests/
-│   └── health/                  # Health check and monitoring
-│       ├── __init__.py
-│       ├── views.py             # Health check endpoints
-│       ├── urls.py              # Health URLs
-│       └── checks.py            # Custom health checks
-├── static/                      # Static files (CSS, JS, images)
+│   ├── posts/                  # Posts (images, captions, likes)
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── serializers.py
+│   │   └── tests/
+│   ├── comments/               # Comments and replies
+│   ├── authentication/         # JWT login, logout, refresh
+│   ├── health/                 # Health check endpoints
+│   └── api_v1/                 # API versioning root app
+│       ├── urls.py             # Include all v1 app routes
+├── static/                     # Static files (CSS, JS, images)
 │   ├── css/
 │   ├── js/
 │   └── images/
-├── media/                       # User uploaded files
-├── templates/                   # Django templates (if using template rendering)
+├── media/                      # User uploaded content (avatars, posts)
+├── templates/                  # HTML templates (server-rendered pages)
 │   ├── base.html
-│   └── emails/                  # Email templates
-├── locale/                      # Internationalization files
-│   ├── en/
-│   └── es/
+│   ├── users/
+│   ├── posts/
+│   └── emails/
 ├── docker/
-│   ├── Dockerfile               # Main application container
-│   ├── docker-compose.yml       # Development environment
-│   ├── docker-compose.prod.yml  # Production environment
+│   ├── Dockerfile              # Application container
+│   ├── docker-compose.yml      # Local dev setup
+│   ├── docker-compose.prod.yml # Production setup
 │   ├── nginx/
-│   │   ├── Dockerfile           # Nginx container for static files
-│   │   └── nginx.conf           # Nginx configuration
-│   └── entrypoint.sh            # Container startup script
-├── scripts/
-│   ├── start.sh                 # Start development server
-│   ├── test.sh                  # Run tests with coverage
-│   ├── migrate.sh               # Run migrations
-│   ├── collectstatic.sh         # Collect static files
-│   └── backup.sh                # Database backup script
-├── docs/                        # Project documentation
-│   ├── api.md                   # API documentation
-│   ├── deployment.md            # Deployment guide
-│   └── development.md           # Development setup
-├── logs/                        # Application logs (gitignored)
-├── .env.example                 # Environment variables template
-├── .gitignore                   # Git ignore file
-├── pytest.ini                  # Pytest configuration
-├── pyproject.toml              # Project metadata and tool configs
-├── Makefile                    # Common commands shortcuts
+│   │   ├── Dockerfile
+│   │   └── nginx.conf          # Serve static & media files
+│   └── entrypoint.sh
+├── scripts/                    # Automation scripts
+│   ├── start.sh
+│   ├── migrate.sh
+│   ├── collectstatic.sh
+│   └── backup.sh
+├── docs/                       # Developer docs
+│   ├── api.md
+│   ├── deployment.md
+│   └── development.md
+├── logs/                       # Log files (rotated, gitignored)
+├── .env.example                # Env variable template
+├── .gitignore
+├── pytest.ini                  # Pytest config
+├── pyproject.toml              # Tool config (Black, isort)
+├── Makefile                    # CLI shortcuts
 └── README.md                   # Project overview and setup
 ```
 
 # Django Project Structure - File Purpose & Usage
+---
 
-## Root Level Files
+## Root-Level Structure
+
 ```
-├── manage.py                     # Django CLI tool (runserver, migrate, shell, etc.)
-├── requirements/
-│   ├── base.txt                  # Core dependencies (Django, DRF, psycopg2)
-│   ├── development.txt           # Dev tools (django-debug-toolbar, ipdb)
-│   ├── production.txt            # Production deps (gunicorn, sentry-sdk)
-│   └── testing.txt               # Test tools (pytest-django, factory-boy)
+django-enterprise/
+├── manage.py                     # Django CLI entry point
 ├── .env.example                  # Environment variables template
-├── pytest.ini                   # Pytest configuration (Django settings, markers)
-├── pyproject.toml               # Project metadata, black/isort configuration
-├── Makefile                     # Shortcuts for common commands
-└── README.md                    # Setup instructions and project overview
+├── pytest.ini                   # Pytest configuration
+├── pyproject.toml               # Project metadata & tool configs
+├── Makefile                     # Shortcuts for CLI (migrate, test, etc.)
+├── README.md                    # Project overview & setup guide
+├── requirements/                # Organized Python dependencies
+│   ├── base.txt                 # Common dependencies (Django, DRF, psycopg2)
+│   ├── development.txt          # Dev-only tools (debug-toolbar, ipdb)
+│   ├── production.txt           # Prod-only tools (gunicorn, sentry)
+│   └── testing.txt              # Testing tools (pytest, coverage)
 ```
 
-## Config Directory (Project Settings)
+---
+
+## Project Configuration (`config/`)
+
 ```
-├── config/                       # Main project configuration (replaces 'myproject')
-│   ├── __init__.py              # Makes config a package
-│   ├── settings/
-│   │   ├── __init__.py          # Makes settings a package
-│   │   ├── base.py              # Shared settings (INSTALLED_APPS, MIDDLEWARE)
-│   │   ├── development.py       # Dev settings (DEBUG=True, dev database)
-│   │   ├── production.py        # Prod settings (security, performance)
-│   │   ├── testing.py           # Test settings (in-memory DB, no emails)
-│   │   └── local.py.example     # Local overrides template (personal settings)
-│   ├── urls.py                  # Root URL patterns (admin, API routes)
-│   ├── wsgi.py                  # WSGI application for web servers (Apache, Nginx)
-│   ├── asgi.py                  # ASGI application for async (WebSockets, channels)
-│   └── celery.py                # Celery configuration for background tasks
+config/
+├── __init__.py
+├── urls.py                      # Root URL routing
+├── wsgi.py                      # WSGI app for Gunicorn/Apache
+├── asgi.py                      # ASGI app for WebSockets
+├── celery.py                    # Celery worker setup
+└── settings/
+    ├── __init__.py              # Settings module package
+    ├── base.py                  # Shared settings (apps, middleware, DB)
+    ├── development.py           # Dev settings (DEBUG=True, local DB)
+    ├── production.py            # Prod settings (secure configs)
+    ├── testing.py               # Testing configs (in-memory DB)
+    └── local.py.example         # Local override (personal developer configs)
 ```
 
-## Apps Directory Structure
+---
 
-### Common App (`apps/common/`)
-```
-├── apps/
-│   ├── __init__.py              # Makes apps a package
-│   ├── common/                  # Shared utilities across all apps
-│   │   ├── __init__.py          # Makes common a package
-│   │   ├── models.py            # Abstract base models (TimeStampedModel)
-│   │   ├── mixins.py            # Reusable model/view mixins
-│   │   ├── permissions.py       # Custom DRF permissions (IsOwnerOrAdmin)
-│   │   ├── pagination.py        # Custom pagination with metadata
-│   │   ├── exceptions.py        # Custom exception classes and handlers
-│   │   ├── validators.py        # Custom field validators (phone, email)
-│   │   └── utils.py             # Helper functions (date formatting, etc.)
-```
+## Modular Apps (`apps/`)
 
-### User Management App (`apps/users/`)
+### `apps/common/` — Shared Utilities
+
 ```
-│   ├── users/                   # User management functionality
-│   │   ├── __init__.py          # Makes users a package
-│   │   ├── models.py            # User model extending AbstractUser
-│   │   ├── admin.py             # Django admin interface configuration
-│   │   ├── apps.py              # App configuration (signals, ready method)
-│   │   ├── views.py             # DRF ViewSets for user CRUD operations
-│   │   ├── serializers.py       # Request/response validation (UserSerializer)
-│   │   ├── urls.py              # URL patterns for user endpoints
-│   │   ├── permissions.py       # User-specific permissions
-│   │   ├── filters.py           # Django-filter configurations
-│   │   ├── services.py          # Business logic (email verification, etc.)
-│   │   ├── tasks.py             # Celery background tasks (send emails)
-│   │   ├── signals.py           # Django signals (post_save, pre_delete)
-│   │   ├── managers.py          # Custom model managers (active users)
-│   │   ├── migrations/          # Database schema changes
-│   │   └── tests/
-│   │       ├── __init__.py      # Makes tests a package
-│   │       ├── test_models.py   # Model validation and methods tests
-│   │       ├── test_views.py    # API endpoint tests
-│   │       ├── test_services.py # Business logic tests
-│   │       └── factories.py     # Factory Boy for test data generation
+common/
+├── __init__.py
+├── models.py                   # Abstract models (e.g. TimeStampedModel)
+├── mixins.py                   # Reusable view/model mixins
+├── permissions.py              # Custom DRF permissions
+├── pagination.py               # Custom pagination classes
+├── exceptions.py               # Global exception handlers
+├── validators.py               # Custom field validators
+└── utils.py                    # General helper methods
 ```
 
-### Authentication App (`apps/authentication/`)
+### `apps/users/` — User Management
+
 ```
-│   ├── authentication/          # JWT auth, login/logout functionality
-│   │   ├── __init__.py
-│   │   ├── models.py            # RefreshToken, LoginHistory models
-│   │   ├── views.py             # Login, logout, refresh token endpoints
-│   │   ├── serializers.py       # LoginSerializer, TokenSerializer
-│   │   ├── urls.py              # Auth URL patterns (/login, /refresh)
-│   │   ├── services.py          # Auth business logic (token generation)
-│   │   ├── permissions.py       # Auth-related permissions
-│   │   ├── middleware.py        # Custom auth middleware (IP tracking)
-│   │   ├── backends.py          # Custom authentication backends
-│   │   └── tests/
+users/
+├── __init__.py
+├── models.py                   # Custom user model
+├── admin.py                    # Admin registration
+├── apps.py                     # App config
+├── views.py                    # DRF ViewSets for user operations
+├── serializers.py              # Request/response handling
+├── urls.py                     # Routes (e.g. /users/)
+├── permissions.py
+├── filters.py
+├── services.py                 # Business logic (email verify, etc.)
+├── tasks.py                    # Celery tasks
+├── signals.py
+├── managers.py
+├── migrations/
+└── tests/
+    ├── __init__.py
+    ├── test_models.py
+    ├── test_views.py
+    ├── test_services.py
+    └── factories.py
 ```
 
-### Core Business App (`apps/core/`)
+### `apps/authentication/` — Auth (JWT)
+
 ```
-│   ├── core/                    # Main business logic
-│   │   ├── __init__.py
-│   │   ├── models.py            # Core business models (Product, Order, etc.)
-│   │   ├── views.py             # Core API endpoints
-│   │   ├── serializers.py       # Core serializers
-│   │   ├── urls.py              # Core URL patterns
-│   │   ├── services.py          # Core business services
-│   │   └── tests/
+authentication/
+├── __init__.py
+├── models.py                   # Login sessions, refresh tokens
+├── views.py                    # Login, logout, token refresh
+├── serializers.py              # Auth serializers
+├── urls.py                     # Auth routes (/auth/login, etc.)
+├── services.py
+├── permissions.py
+├── middleware.py               # IP logging, session checks
+├── backends.py                 # Custom auth backends
+└── tests/
 ```
 
-### Health Check App (`apps/health/`)
+### `apps/core/` — Social Media Core Logic
+
 ```
-│   └── health/                  # System monitoring and health checks
-│       ├── __init__.py
-│       ├── views.py             # Health endpoints (/health, /readiness)
-│       ├── urls.py              # Health URL patterns
-│       └── checks.py            # Custom health checks (DB, Redis, external APIs)
+core/
+├── __init__.py
+├── models.py                   # Posts, comments, likes
+├── views.py
+├── serializers.py
+├── urls.py
+├── services.py
+└── tests/
 ```
 
-## Static and Media Files
+### `apps/health/` — Monitoring & Readiness
+
 ```
-├── static/                      # Static assets (CSS, JS, images)
-│   ├── css/                     # Stylesheet files
-│   ├── js/                      # JavaScript files
-│   └── images/                  # Static images
-├── media/                       # User uploaded files (profile pics, documents)
-├── templates/                   # Django templates (if using template rendering)
-│   ├── base.html               # Base template with common layout
-│   └── emails/                 # Email templates (welcome, password reset)
+health/
+├── __init__.py
+├── views.py                    # /health, /readiness endpoints
+├── urls.py
+└── checks.py                   # DB, Redis, external API checks
 ```
 
-## Internationalization & Documentation
+---
+
+## API Versioning: `apps/api_v1/`
+
 ```
-├── locale/                      # Translation files for i18n
-│   ├── en/                     # English translations
-│   └── es/                     # Spanish translations
-├── docs/                       # Project documentation
-│   ├── api.md                  # API endpoint documentation
-│   ├── deployment.md           # Deployment instructions
-│   └── development.md          # Development setup guide
+api_v1/
+├── __init__.py
+├── urls.py                     # Root router for API v1 (/api/v1/)
+└── views/
+    ├── users.py                # User API handlers
+    ├── posts.py                # Post-related APIs
+    └── comments.py             # Comment APIs
 ```
 
-## Docker and Scripts
+> Add in `config/urls.py`:
+
+```python
+path("api/v1/", include("apps.api_v1.urls")),
 ```
-├── docker/
-│   ├── Dockerfile              # Main application container build instructions
-│   ├── docker-compose.yml      # Development environment (Django + Postgres + Redis)
-│   ├── docker-compose.prod.yml # Production environment configuration
-│   ├── nginx/
-│   │   ├── Dockerfile          # Nginx container for serving static files
-│   │   └── nginx.conf          
+
+---
+
+## Templates, Static, and Media
+
+```
+├── templates/                  # Django templates (Jinja2 or HTML)
+│   ├── base.html
+│   └── emails/
+│       └── welcome.html
+├── static/                     # Static assets for dev (CSS, JS, images)
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── media/                      # Uploaded media (avatars, images)
+├── staticfiles/                # Collected static files (prod only)
+├── mediafiles/                 # Prod media mount location
+```
+
+---
+
+## Docker Setup
+
+```
+docker/
+├── Dockerfile                  # Django container (Gunicorn)
+├── docker-compose.yml          # Local stack (Django + DB + Redis)
+├── docker-compose.prod.yml     # Prod stack
+├── entrypoint.sh               # Entrypoint to run collectstatic, migrate
+└── nginx/
+    ├── Dockerfile              # Nginx container (static/media)
+    └── nginx.conf              # Nginx config for serving Django + static files
+```
+
+### docker/nginx/nginx.conf
+
+```nginx
+server {
+    listen 80;
+
+    location /static/ {
+        alias /app/staticfiles/;
+        expires 30d;
+    }
+
+    location /media/ {
+        alias /app/mediafiles/;
+    }
+
+    location / {
+        proxy_pass http://web:8000;
+        include /etc/nginx/proxy_params;
+    }
+}
+```
+
+### docker-compose.prod.yml (volumes)
+
+```yaml
+web:
+  volumes:
+    - ./staticfiles:/app/staticfiles
+    - ./mediafiles:/app/mediafiles
+
+nginx:
+  volumes:
+    - ./staticfiles:/app/staticfiles:ro
+    - ./mediafiles:/app/mediafiles:ro
+```
+
+---
+
+## Scripts (Automation)
+
+```
+scripts/
+├── start.sh                    # Start Django dev server
+├── test.sh                     # Run tests
+├── migrate.sh                  # Apply migrations
+├── collectstatic.sh            # Run collectstatic
+└── backup.sh                   # Dump PostgreSQL DB
+```
+
+---
+
+## Local vs Production: Static & Media Config
+
+### In `settings/development.py`
+
+```python
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
+```
+
+```python
+# config/urls.py
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+```
+
+### In `settings/production.py`
+
+```python
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "mediafiles"
+```
+
+Run before deploy:
+
+```bash
+python manage.py collectstatic
+```
+
+
